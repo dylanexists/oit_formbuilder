@@ -1,0 +1,70 @@
+{{define "home"}}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
+  <link rel="stylesheet" href="/static/css/formforge.css">
+  <title>FormForge</title>
+</head>
+<body>
+<main id="app" class="container home-page">
+  <section class="welcome" aria-labelledby="welcome-title">
+    <p class="eyebrow">FormForge</p>
+    <h1 id="welcome-title">Build a form that fits your needs</h1>
+    <p>
+      Create a survey from scratch or start with a template. You can edit the
+      questions, preview the form, and review responses.
+    </p>
+  </section>
+
+  {{if .UsingFallback}}
+  <p class="notice" role="status">
+    The template service is unavailable, so these local templates are being used.
+  </p>
+  {{end}}
+
+  <section class="form-start-options" aria-labelledby="start-title">
+    <h2 id="start-title">How would you like to start?</h2>
+
+    <article class="start-option">
+      <h3>Start with a blank form</h3>
+      <p>Build your survey one question at a time.</p>
+      <a href="/forms/blank" role="button">Create a blank form</a>
+    </article>
+
+    <article class="template-options" aria-labelledby="templates-title">
+      <header class="template-section-header">
+        <h3 id="templates-title">Start with a template</h3>
+        <a
+          class="admin-api-toggle"
+          href="{{if .MakeFailForTesting}}/{{else}}/?makeFailForTesting=true{{end}}"
+          role="button"
+          aria-pressed="{{.MakeFailForTesting}}"
+        >
+          <span aria-hidden="true">{{if .MakeFailForTesting}}&#10003;{{else}}&#10005;{{end}}</span>
+          Admin: Intentionally Break API?
+        </a>
+      </header>
+      <p>Choose a template to import, then customize it.</p>
+
+      {{if .Templates}}
+      <ul class="template-list">
+        {{range .Templates}}
+        <li class="template-card">
+          <h4>{{.Title}}</h4>
+          {{if .Description}}<p>{{.Description}}</p>{{end}}
+          <a href="/forms/{{.ID}}{{if $.MakeFailForTesting}}?makeFailForTesting=true{{end}}" role="button">Use this template</a>
+        </li>
+        {{end}}
+      </ul>
+      {{else}}
+      <p>No templates are available right now. You can create a blank form instead.</p>
+      {{end}}
+    </article>
+  </section>
+</main>
+</body>
+</html>
+{{end}}

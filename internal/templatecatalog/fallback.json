@@ -1,0 +1,51 @@
+{
+  "id": "generic-hr-questionnaire",
+  "title": "Generic HR Questionnaire",
+  "description": "A basic local questionnaire for gathering workplace feedback.",
+  "questions": [
+    {
+      "id": "work-environment",
+      "text": "How satisfied are you with your current work environment?",
+      "type": "multiple_choice",
+      "required": false,
+      "options": [
+        "Very satisfied",
+        "Somewhat satisfied",
+        "Neither satisfied nor dissatisfied",
+        "Somewhat dissatisfied",
+        "Very dissatisfied"
+      ]
+    },
+    {
+      "id": "role-clarity",
+      "text": "How clear are your role and responsibilities?",
+      "type": "multiple_choice",
+      "required": false,
+      "options": [
+        "Very clear",
+        "Mostly clear",
+        "Neither clear nor unclear",
+        "Somewhat unclear",
+        "Very unclear"
+      ]
+    },
+    {
+      "id": "workplace-improvement",
+      "text": "What is one thing that would improve your experience at work?",
+      "type": "short_text",
+      "required": false
+    },
+    {
+      "id": "support-and-training",
+      "text": "What additional support or training would help you succeed?",
+      "type": "short_text",
+      "required": false
+    },
+    {
+      "id": "additional-feedback",
+      "text": "Is there anything else you would like to share?",
+      "type": "short_text",
+      "required": false
+    }
+  ]
+}

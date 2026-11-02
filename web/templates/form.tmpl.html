@@ -1,0 +1,187 @@
+{{define "form"}}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
+  <link rel="stylesheet" href="/static/css/formforge.css">
+  <script src="/static/js/dismissible-notice.js" defer></script>
+  <script src="/static/js/form-mode.js?v=2" defer></script>
+  <title>{{.Form.Title}} | FormForge</title>
+</head>
+<body>
+<main class="container home-page form-page" data-form-id="{{.Form.ID}}">
+  <div class="form-page-toolbar">
+    <a href="{{if .MakeFailForTesting}}/?makeFailForTesting=true{{else}}/{{end}}" role="button" class="secondary">Back to FormForge</a>
+    {{if not .Error}}
+    <button type="button" class="view-mode-toggle" data-view-mode-toggle aria-controls="editor-view preview-view" aria-pressed="false">
+      Switch to User Preview
+    </button>
+    {{end}}
+  </div>
+
+  {{if .UsingFallback}}
+  <div class="fallback-notice" role="status" data-dismissible-notice>
+    <p>The trivia API questions could not be loaded, so this form uses the locally bundled default questions.</p>
+    <button type="button" class="fallback-notice-close" aria-label="Close fallback notice" data-dismiss-notice>&times;</button>
+  </div>
+  {{end}}
+
+  {{if .Error}}
+  <h1>{{.Form.Title}}</h1>
+  <p class="notice" role="alert">{{.Error}}</p>
+  {{else}}
+  <section id="editor-view" aria-labelledby="editor-title">
+    <h1 id="editor-title">Editor View</h1>
+    <p>Form edits are saved locally in this browser and remain after reload.</p>
+
+    <label for="edit-form-title">Form title</label>
+    <input id="edit-form-title" type="text" value="{{.Form.Title}}" data-sync-key="form-title">
+
+    <label for="edit-form-description">Form description</label>
+    <textarea id="edit-form-description" rows="2" data-sync-key="form-description">{{.Form.Description}}</textarea>
+
+    <ol id="editor-questions" class="assessment-questions editor-questions">
+      {{range .Form.Questions}}
+      {{$question := .}}
+      <li class="template-card assessment-question" data-question-editor data-question-id="{{$question.ID}}" data-saved-type="{{$question.Type}}" data-saved-answer="{{$question.Answer}}" data-saved-option-count="{{len $question.Options}}">
+        <button type="button" class="icon-button delete-question-button" aria-label="Delete question" title="Delete question" data-delete-question>&times;</button>
+        <input type="hidden" value="{{$question.Type}}" data-question-type data-question-edit-field>
+        <label>
+          Question text
+          <input type="text" value="{{$question.Text}}" data-sync-key="question-text-{{$question.ID}}" data-question-edit-field>
+        </label>
+        <button type="button" class="question-type-toggle secondary outline" data-question-type-toggle>
+          {{if eq $question.Type "short_text"}}Switch to Multiple Choice{{else}}Switch to Short Response{{end}}
+        </button>
+        <div data-question-type-section="short_text" {{if ne $question.Type "short_text"}}hidden{{end}}>
+          <p>Response type: Short Response Box</p>
+        </div>
+        <div data-question-type-section="multiple_choice" {{if ne $question.Type "multiple_choice"}}hidden{{end}}>
+          <fieldset data-question-options>
+            <legend>Answer options — select the correct answer</legend>
+            <label class="no-correct-answer-choice">
+              <input type="radio" name="correct-{{$question.ID}}" value="__no_correct_answer__" data-question-edit-field data-correct-answer data-no-correct-answer {{if not $question.Answer}}checked{{end}}>
+              <span>No correct answer</span>
+            </label>
+            {{range $index, $option := $question.Options}}
+            <div class="editor-answer-option" data-answer-row>
+              <label class="correct-answer-choice">
+                <input type="radio" name="correct-{{$question.ID}}" value="{{$option}}" data-question-edit-field data-correct-answer {{if eq $option $question.Answer}}checked{{end}}>
+                <span>Correct</span>
+              </label>
+              <input type="text" value="{{$option}}" data-sync-key="option-{{$question.ID}}-{{$index}}" data-question-edit-field data-question-option>
+              <button type="button" class="icon-button delete-answer-button" aria-label="Delete answer" title="Delete answer" data-delete-answer>&times;</button>
+            </div>
+            {{end}}
+          </fieldset>
+          <button type="button" class="add-answer-button secondary outline" data-add-answer>Add new answer</button>
+        </div>
+        <p class="unsaved-change-warning" data-unsaved-warning role="alert" hidden>Save your changes before opening User Preview.</p>
+        <button type="button" class="save-question-button" data-save-question disabled>Save question</button>
+      </li>
+      {{end}}
+    </ol>
+    <button type="button" class="add-question-button" data-add-question>Add new question</button>
+
+    <template id="editor-question-template">
+      <li class="template-card assessment-question" data-question-editor data-question-id="" data-saved-type="" data-saved-answer="" data-saved-option-count="0">
+        <button type="button" class="icon-button delete-question-button" aria-label="Delete question" title="Delete question" data-delete-question>&times;</button>
+        <input type="hidden" value="multiple_choice" data-question-type data-question-edit-field>
+        <label>
+          Question text
+          <input type="text" value="New question" data-question-edit-field data-question-text-input>
+        </label>
+        <button type="button" class="question-type-toggle secondary outline" data-question-type-toggle>Switch to Short Response</button>
+        <div data-question-type-section="short_text" hidden>
+          <p>Response type: Short Response Box</p>
+        </div>
+        <div data-question-type-section="multiple_choice">
+          <fieldset data-question-options>
+            <legend>Answer options — select the correct answer</legend>
+            <label class="no-correct-answer-choice">
+              <input type="radio" name="correct-new" value="__no_correct_answer__" data-question-edit-field data-correct-answer data-no-correct-answer>
+              <span>No correct answer</span>
+            </label>
+            <div class="editor-answer-option" data-answer-row>
+              <label class="correct-answer-choice">
+                <input type="radio" name="correct-new" value="Option 1" data-question-edit-field data-correct-answer checked>
+                <span>Correct</span>
+              </label>
+              <input type="text" value="Option 1" data-question-edit-field data-question-option>
+              <button type="button" class="icon-button delete-answer-button" aria-label="Delete answer" title="Delete answer" data-delete-answer>&times;</button>
+            </div>
+            <div class="editor-answer-option" data-answer-row>
+              <label class="correct-answer-choice">
+                <input type="radio" name="correct-new" value="Option 2" data-question-edit-field data-correct-answer>
+                <span>Correct</span>
+              </label>
+              <input type="text" value="Option 2" data-question-edit-field data-question-option>
+              <button type="button" class="icon-button delete-answer-button" aria-label="Delete answer" title="Delete answer" data-delete-answer>&times;</button>
+            </div>
+          </fieldset>
+          <button type="button" class="add-answer-button secondary outline" data-add-answer>Add new answer</button>
+        </div>
+        <p class="unsaved-change-warning" data-unsaved-warning role="alert" hidden>Save your changes before opening User Preview.</p>
+        <button type="button" class="save-question-button is-dirty" data-save-question>Save changes</button>
+      </li>
+    </template>
+
+    <template id="preview-question-template">
+      <li class="template-card assessment-question" data-preview-question data-question-id="" data-required="false" data-correct-answer="">
+        <h2 data-preview-key=""></h2>
+        <div data-preview-question-type="short_text" hidden>
+          <label>Your response</label>
+          <textarea rows="3"></textarea>
+        </div>
+        <div data-preview-question-type="multiple_choice">
+          <fieldset data-preview-options></fieldset>
+        </div>
+      </li>
+    </template>
+  </section>
+
+  <section id="preview-view" aria-labelledby="preview-title" hidden>
+    <h1 id="preview-title" data-preview-key="form-title">{{.Form.Title}}</h1>
+    <p data-preview-key="form-description">{{.Form.Description}}</p>
+    <ol id="preview-questions" class="assessment-questions">
+      {{range .Form.Questions}}
+      {{$question := .}}
+      <li class="template-card assessment-question" data-preview-question data-question-id="{{$question.ID}}" data-required="{{$question.Required}}" data-correct-answer="{{$question.Answer}}">
+        <h2 data-preview-key="question-text-{{$question.ID}}">{{$question.Text}}</h2>
+        <div data-preview-question-type="short_text" {{if ne $question.Type "short_text"}}hidden{{end}}>
+        <label for="preview-{{$question.ID}}">Your response</label>
+        <textarea id="preview-{{$question.ID}}" rows="3" {{if $question.Required}}required{{end}}></textarea>
+        </div>
+        <div data-preview-question-type="multiple_choice" {{if ne $question.Type "multiple_choice"}}hidden{{end}}>
+          <fieldset data-preview-options>
+            {{range $index, $option := $question.Options}}
+            <label>
+              <input type="radio" name="{{$question.ID}}" value="{{$option}}" {{if $question.Required}}required{{end}}>
+              <span data-preview-key="option-{{$question.ID}}-{{$index}}">{{$option}}</span>
+            </label>
+            {{end}}
+          </fieldset>
+        </div>
+      </li>
+      {{end}}
+    </ol>
+    <div class="response-submit-actions">
+      <p data-submit-guidance role="status" aria-live="polite">Answer every question to enable submission.</p>
+      <button type="button" class="submit-response-button" data-submit-response disabled>Submit response</button>
+    </div>
+  </section>
+
+  <section id="submission-view" aria-labelledby="submission-title" hidden>
+    <h1 id="submission-title">Response submitted</h1>
+    <p>Your response is saved in this browser.</p>
+    <ol class="assessment-questions submitted-answers" data-submitted-answers></ol>
+    <button type="button" class="retake-form-button" data-retake-form>Take this form again</button>
+  </section>
+  {{end}}
+</main>
+<script src="/static/js/form-responses.js?v=2" defer></script>
+</body>
+</html>
+{{end}}
